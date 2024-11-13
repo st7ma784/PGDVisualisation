@@ -1,0 +1,9 @@
+FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
+COPY requirements.txt /tmp/
+RUN pip install --requirement /tmp/requirements.txt --no-cache-dir
+WORKDIR /app
+COPY . /app
+
+EXPOSE 5000/tcp
+
+CMD ["bash", "gunicorn.sh"]

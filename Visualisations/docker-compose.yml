@@ -1,0 +1,28 @@
+version: "3"
+services:
+  vis:
+    image: st7ma784/PGD:latest
+    container_name: vis
+    restart: always
+    ports:
+    # open port 5000 on host to port 5000 
+      - "5000:5000"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 10 vis
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: always
+
+

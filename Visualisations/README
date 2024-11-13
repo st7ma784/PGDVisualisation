@@ -1,0 +1,13 @@
+This folder is dedicated to visualising the logit creation methods. 
+
+we have: Flask.py, which is the main file that runs the flask app.
+
+The flask app has 2 options : 
+-a drop down for "n" which is the number of items on the screen. 
+-a drop down for logitsversion which is the method to use from the model/nargsloss.py file.
+
+the flask app will then create 'n' items on the screen, using theyre x and y position as a vector, which will then print a value of similarity calucated by the logitsversion method.
+
+The flask app will then print the average similarity of all the items on the screen.
+
+This will then be made into a Docker container, which will be used to create a web app, deployed as a github action.
