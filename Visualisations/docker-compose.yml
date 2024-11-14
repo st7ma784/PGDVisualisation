@@ -1,7 +1,7 @@
 version: "3"
 services:
   vis:
-    image: st7ma784/PGD:latest
+    image: st7ma784/pgdvis:latest
     container_name: vis
     restart: always
     ports:
