@@ -349,9 +349,10 @@
 <button type="button" class="b" id="Add Prediction" onclick="addPrediction()">Add Prediction</button>
 <button type="button" class="b" id="Remove Prediction" onclick="removePrediction()">Remove Prediction</button>
 <!-- add slider between 5 and 30 px -->
-<input type="range" id="numLabels" name="numLabels" min="5" max="30" value="10" onchange="doUpdate()">
+<input type="range" id="numLabels" name="numLabels" min="5" max="80" value="10" onchange="doUpdate()">
 <label for="numLabels">Number of Labels</label>
-<input type="range" id="radius" name="radius" min="5" max="30" value="10" onchange="doUpdate()">
+<input type="range" id="radius" name="radius" min="1" max="40" value="10" onchange="doUpdate()">
+<label for="radius">Radius</label>
 <div class="tooltip">How To use...
     <span class="tooltiptext"><br>
           

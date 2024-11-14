@@ -27,8 +27,8 @@ async def getS():
     target_x=float(data['targetx'][:-2])
     target_y=float(data['targety'][:-2])
     norm=data['norm']
-    radius=data['radius']/100
-    num_points=data['numlabels']
+    radius=int(data['radius'])/100
+    num_points=int(data['numlabels'])
     label_xys=torch.stack([torch.tensor([x,y],requires_grad=False)for x,y in zip(label_x,label_y)])-(wh/2)
     pred_xys=torch.stack([torch.tensor([[x,y]],requires_grad=False)for x,y in zip(pred_x,pred_y)])-(wh/2)
     target_xys=torch.tensor([[target_x,target_y]],requires_grad=False)-(wh/2)
