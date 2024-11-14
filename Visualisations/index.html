@@ -121,6 +121,8 @@
         var y = [];
         var pred_x = [];
         var pred_y = [];
+        var radius=document.getElementById("radius").value;
+        var num_points=document.getElementById("numLabels").value;
         document.getElementById("S").innerHTML = "";
         //check if orbs are left on the screen
         if (orbs.hasChildNodes == false) {    
@@ -153,7 +155,7 @@
 
         let isNorm = document.getElementById("norm").checked;
       
-        return { 'labelx': x, 'labely': y,"predx":pred_x,"predy":pred_y, "targetx":target_x, "targety":target_y, "norm":isNorm, "width":  window.innerWidth, "height": window.innerHeight};
+        return { 'labelx': x, 'labely': y,"predx":pred_x,"predy":pred_y, "targetx":target_x, "targety":target_y, "norm":isNorm, "radius":radius,"numlabels":num_points,"width":  window.innerWidth, "height": window.innerHeight};
 
     }
     function doUpdate(){
@@ -346,7 +348,10 @@
 <button type="button" class="b" id="Add Target" onclick="AddTarget()">Add Target</button>
 <button type="button" class="b" id="Add Prediction" onclick="addPrediction()">Add Prediction</button>
 <button type="button" class="b" id="Remove Prediction" onclick="removePrediction()">Remove Prediction</button>
-
+<!-- add slider between 5 and 30 px -->
+<input type="range" id="numLabels" name="numLabels" min="5" max="30" value="10" onchange="doUpdate()">
+<label for="numLabels">Number of Labels</label>
+<input type="range" id="radius" name="radius" min="5" max="30" value="10" onchange="doUpdate()">
 <div class="tooltip">How To use...
     <span class="tooltiptext"><br>
           

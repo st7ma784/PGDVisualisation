@@ -27,6 +27,8 @@ async def getS():
     target_x=float(data['targetx'][:-2])
     target_y=float(data['targety'][:-2])
     norm=data['norm']
+    radius=data['radius']/100
+    num_points=data['numlabels']
     label_xys=torch.stack([torch.tensor([x,y],requires_grad=False)for x,y in zip(label_x,label_y)])-(wh/2)
     pred_xys=torch.stack([torch.tensor([[x,y]],requires_grad=False)for x,y in zip(pred_x,pred_y)])-(wh/2)
     target_xys=torch.tensor([[target_x,target_y]],requires_grad=False)-(wh/2)
@@ -35,8 +37,7 @@ async def getS():
     pred_xys=pred_xys/wh
     target_xys=target_xys/wh
 
-    theta = torch.linspace(0, 2 * np.pi, 40)
-    radius = 0.15
+    theta = torch.linspace(0, 2 * np.pi, num_points)
     cos_theta = torch.cos(theta)
     sin_theta = torch.sin(theta)
     circle = torch.stack([cos_theta, sin_theta], dim=-1)*radius 
@@ -80,6 +81,12 @@ async def getS():
     #convert this to a json object and return it
     return jsonify(dictionary)
 
+
+#write pytests
+def test_getS():
+    with app.test_client() as c:
+        response = c.post('/data', json={'label_x': [0,0], 'label_y': [0,0],"pred_x":[0,0],"pred_y":[0,0], "target_x":0, "target_y":0, "norm":False, "width":  100, "height": 100})
+        assert response.status_code == 200
 
 if __name__ == "__main__":
 
