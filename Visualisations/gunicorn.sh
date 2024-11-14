@@ -6,4 +6,4 @@ workers=$(python -c 'import multiprocessing; print(multiprocessing.cpu_count() *
 
 #start gunicorn with number of workers
 
-gunicorn --workers=$workers app:app -b 0.0.0.0:8000
+gunicorn --workers=$workers app:app -b 0.0.0.0:5000

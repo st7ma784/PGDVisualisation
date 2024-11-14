@@ -35,8 +35,8 @@
     }
     /* add pgd class of small orbs */
     .pgd {
-        width: 2px;
-        height: 2px;
+        width: 10px;
+        height: 10px;
         -moz-border-radius: 5px;
         -webkit-border-radius: 5px;
         border-radius: 5px;
@@ -115,25 +115,37 @@
 <script src="https://cdn.jsdelivr.net/gh/interactiveJS/interactiveJS@v2.0.1/src/individuals/draggable.min.js"></script>
 <script>
     function getdata(){
-        var orbs = document.getElementsByClassName("label");
-        var preds= document.getElementsByClassName("pred");
+        var orbs = document.getElementById("labelContainer");
+        var preds= document.getElementById("predContainer");
         var x = [];
         var y = [];
         var pred_x = [];
         var pred_y = [];
+        document.getElementById("S").innerHTML = "";
         //check if orbs are left on the screen
-        if (orbs.length == 0) {
-            document.getElementById("S").innerHTML = "";
+        if (orbs.hasChildNodes == false) {    
+            //print a message to the screen
+            document.getElementById("S").innerHTML = "Please add some labels to the screen";
+            return;
+        }
+        if (preds.hasChildNodes == false) {
+            //print a message to the screen
+            document.getElementById("S").innerHTML = "Please add some predictions to the screen";
+            return;
+        }
+        if (document.getElementById("targetContainer").hasChildNodes == false) {
+            //print a message to the screen
+            document.getElementById("S").innerHTML = "Please add a target to the screen";
             return;
         }
         
-        for (var i = 0; i < orbs.length; i++) {
-            x.push(orbs[i].style.left);
-            y.push(orbs[i].style.top);
+        for (var i = 0; i < orbs.childNodes.length; i++) {
+            x.push(orbs.childNodes[i].style.left);
+            y.push(orbs.childNodes[i].style.top);
         }
-        for (var i = 0; i < preds.length; i++) {
-            pred_x.push(preds[i].style.left);
-            pred_y.push(preds[i].style.top);
+        for (var i = 0; i < preds.childNodes.length; i++) {
+            pred_x.push(preds.childNodes[i].style.left);
+            pred_y.push(preds.childNodes[i].style.top);
         }
         var target=document.getElementById("target");
         var target_x = target.style.left;
@@ -141,11 +153,16 @@
 
         let isNorm = document.getElementById("norm").checked;
       
-        return { 'label_x': x, 'label_y': y,"pred_x":pred_x,"pred_y":pred_y, "target_x":target_x, "target_y":target_y, "norm":isNorm, "width":  window.innerWidth, "height": window.innerHeight};
+        return { 'labelx': x, 'labely': y,"predx":pred_x,"predy":pred_y, "targetx":target_x, "targety":target_y, "norm":isNorm, "width":  window.innerWidth, "height": window.innerHeight};
 
     }
     function doUpdate(){
-        let dataJSON = JSON.stringify(getdata());
+        let data = getdata();
+        // if there is no data, return
+        if (data == undefined) {
+            return;
+        }
+        let dataJSON = JSON.stringify(data);
         let request = new XMLHttpRequest();
         request.onreadystatechange = function(){
             if (request.readyState === 4) {
@@ -154,36 +171,49 @@
                 // the returns is a set of x,y and colour values. 
                 
                 // we will clear the screen of PGD elements and then add the new ones.
-                var pgd = document.getElementsByClassName("pgd");
-                while (pgd.length > 0) {
-                    pgd[0].remove();
-
+                
+                // remove all child nodes
+                // var ids=pgds.map(function(val) { return val.id; });
+                var node=document.getElementById('graph');
+                for (var i = 0; i < node.childNodes.length; i++) {
+                    node.removeChild(node.childNodes[i]);
                 }
+                node.innerHTML = '';
+                  
+
                 // add the new pgd elements
-                for (var i = 0; i < points["x"].length; i++) {
+                let x=points["x"];
+                let y=points["y"];
+                // multiply both by window width and height to get the correct position
+                // x= x.map(function(val) { return (val+1)* (window.innerWidth/2); });
+                // y= y.map(function(val) { return (val+1)*(window.innerHeight/2); });
+                colour = points["values"];
+                colour= colour.map(function(val) { return val*255; });
+                for (var i = 0; i < x.length; i++) {
                     var pgd = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     pgd.setAttribute("class", "pgd");
-                    let x=points["x"][i];
-                    let y=points["y"][i];
+                    var x_i=x[i];
+                    var y_i=y[i];
                     
-                    pgd.setAttribute("cx", x);
-                    pgd.setAttribute("cy", y);
-                    pgd.setAttribute("r", 5);
-                    pgd.setAttribute("fill", points["colour"][i]);
-                    node.insertAdjacentHTML('afterend', '<div id="pgd'+i+'" style="left:'+x+'px;top:'+y+'px;position:absolute;" class="pgd" draggable="false" style="background-color:rgb('+points["colour"][i]*255+','+points["colour"][i]*255+','+points["colour"][i]*255+');"></d>');
-                    node.appendChild(orb);
-                    document.getElementById("graph").appendChild(pgd);
+                    pgd.setAttribute("fill", colour[i]);
+                    // pgd.innerHTML = "x: " + x_i + " y: " + y_i;
+                    // node.insertAdjacentElement('afterend', pgd);
+                    pgd.innerHTML = pgd.innerHTML+'<div id="pgd'+i+'" style="left:'+x_i+'px;top:'+y_i+'px;position:absolute;background-color:rgb('+colour[i]+','+colour[i]+','+colour[i]+');" class="pgd"></d>'
+                    node.appendChild(pgd);
+                    
                 }
+                node.innerHTML = node.innerHTML;
             }
         };
         const action = "POST";
         // get endpoint from the server host environment
         // const endpoint = "http://"+window.location.hostname+":5000/demo/data";
-        const endpoint = "http://localhost:5000/demo/data";
+        const endpoint = "http://localhost:5000/data";
 
         request.open(action, endpoint);
         request.setRequestHeader("Content-Type", "application/json");
-
+        // add header for the request
+        request.setRequestHeader("Access-Control-Allow-Origin", "*");
         request.send(dataJSON);
         }
         
@@ -191,81 +221,106 @@
     function ADDLabel() {
         // Remove the last row from the table
         var orb = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        node = document.getElementById('graph');
-        node.appendChild(orb);
+        node = document.getElementById('labelContainer');
         // count the number of children in the graph
-        nodes = document.getElementById('graph').childNodes;
+        nodes = document.getElementsByClassName('label');
         orb.setAttribute("class", "label");
         orb.setAttribute("id", "orb"+nodes.length);
+        orb.setAttribute("draggable", "true");
+        orb.setAttribute("ondragend", "orblistener(event)");
+        
         var x = Math.floor(Math.random() *  window.innerWidth);
         var y = Math.floor(Math.random() * window.innerHeight);
         var [rx, ry] = convertxytorelxy(x,y);
-        node.insertAdjacentHTML('afterend', '<div id="orb'+nodes.length+'" style="left:'+x+'px;top:'+y+'px;position:absolute;" class="label" draggable="true" ondragend="orblistener(event)"> x:' + rx + ' <br> y:' + ry+ '</d>');
+        orb.style.left =x + 'px';
+        orb.style.top = y+ 'px';
+        orb.style.position = 'absolute';
+        orb.innerHTML='x:'+rx + ' <br> y:' + ry;
+        // orb.innerHTML=orb.innerHTML+'<div id="orb'+nodes.length+'" style="left:'+x+'px;top:'+y+'px;position:absolute;" class="label" draggable="true" ondragend="orblistener(event)"> + '</d>';
         node.appendChild(orb);
-        node.innerHTML = node.innerHTML;
+        node.innerHTML=node.innerHTML;
         doUpdate();
 
     }
     function AddTarget(){
         //add the target to the screen, this will be the point that we are trying to get to. as a draggable green x
         //remove the old target
-        var target = document.getElementById("target");
-        if (target != null) {
-            target.remove();
+        var group= document.getElementById('targetContainer');
+        if (group.hasChildNodes == true) {
+            var id = group.childNodes[0].id;
+            group.removeChild(group.childNodes[0]);
+            group.innerHTML = group.innerHTML;
         }
+
         var target = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        node = document.getElementById('graph');
-        node.appendChild(target);
         // count the number of children in the graph
-        nodes = document.getElementsByClassName('target');
         target.setAttribute("class", "target");
-        target.setAttribute("id", "target"+nodes.length);
+        target.setAttribute("id", "target");
+        target.setAttribute("draggable", "true");
+        target.setAttribute("ondragend", "orblistener(event)");
         var x = Math.floor(Math.random() *  window.innerWidth);
         var y = Math.floor(Math.random() * window.innerHeight);
         var [rx, ry] = convertxytorelxy(x,y);
-        node.insertAdjacentHTML('afterend', '<div id="target'+nodes.length+'" style="left:'+x+'px;top:'+y+'px;position:absolute;" class="target" draggable="true" ondragend="orblistener(event)"> x:' + rx + ' <br> y:' + ry+ '</d>');
-        node.appendChild(orb);
-        node.innerHTML = node.innerHTML;
-        doUpdate();
         //add a green x to the screen
         target.style.left = x + 'px';
         target.style.top = y + 'px';
         target.style.position = 'absolute';
-        document.getElementById('graph').appendChild(target);
+        target.innerHTML='x:'+rx + ' <br> y:' + ry;
+        group.appendChild(target);
+        group.innerHTML=group.innerHTML;
         doUpdate();
     }
     function addPrediction(){
         // add a prediction point to the screen, which will represent and instance of the target label, as a draggable element
         var pred = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        node = document.getElementById('graph');
-        preds = document.getElementsByClassName('pred');
+        var node = document.getElementById('predContainer');
+        var preds = document.getElementsByClassName('pred');
         pred.setAttribute("class", "pred");
         pred.setAttribute("id", "pred"+nodes.length);
+        pred.setAttribute("draggable", "true");
+        pred.setAttribute("ondragend", "orblistener(event)");
         var x = Math.floor(Math.random() *  window.innerWidth);
         var y = Math.floor(Math.random() * window.innerHeight);
         var [rx, ry] = convertxytorelxy(x,y);
-
-        node.insertAdjacentHTML('afterend', '<div id="pred'+preds.length+'" style="left:'+x+'px;top:'+y+'px;position:absolute;" class="pred" draggable="true" ondragend="orblistener(event)"> x:' + rx + ' <br> y:' + ry+ '</d>');
-        pred.innerHTML = pred.innerHTML;
         pred.style.left = x + 'px';
         pred.style.top = y + 'px';
         pred.style.position = 'absolute';
-        document.getElementById('graph').appendChild(pred);
+        pred.innerHTML='x:'+rx + ' <br> y:' + ry;
+        node.appendChild(pred);
+        node.innerHTML=node.innerHTML;
         doUpdate();
     }
 
     function removePrediction(){
-        // remove the last prediction point from the screen
-        let nodes = document.getElementsByClassName('pred');
-        let id = "pred"+nodes.length;
-        nodes[nodes.length-1].remove();
-        //check html for the id 
-        document.getElementById(id).remove();       
+        // do update to remove the prediction from the screen
+        var group= document.getElementById('predContainer');
+        var id = group.childNodes[0].id;
+        group.removeChild(group.childNodes[0]);
+        group.innerHTML = group.innerHTML;
+        // document.getElementById(id).remove();
+
+
         doUpdate();
+
+
     }
+    function REMOVELabel() {
+        
+
+        var group= document.getElementById('labelContainer');
+        var id = group.childNodes[0].id;
+        group.removeChild(group.childNodes[0]);
+        // document.getElementById(id).remove();
+        group.innerHTML = group.innerHTML;  
+        doUpdate();
+       
+    }
+
     function convertxytorelxy(x,y) {
         var relx = x- window.innerWidth/2;
         var rely = y - window.innerHeight/2;
+        relx = relx/(window.innerWidth/2);
+        rely = rely/(window.innerHeight/2);
         return [relx,rely];
     }
     function orblistener(event) {
@@ -275,20 +330,11 @@
         orb.style.left = x + 'px';
         orb.style.top = y + 'px';
         orb.style.position = 'absolute';
-        // var [rx,ry] = convertxytorelxy(x,y);
-        // orb.innerHTML = "x: " + rx + " <br> y: " +ry + "<br>";
+
+        var [rx,ry] = convertxytorelxy(x,y);
+        orb.innerHTML = "x: " + rx + " <br> y: " +ry + "<br>";
         doUpdate();
         }
-    function REMOVEORB() {
-        
-        let nodes = document.getElementById('graph').childNodes;
-        let id = "orb"+nodes.length;
-        nodes[nodes.length-1].remove();
-        //check html for the id 
-        document.getElementById(id).remove();       
-        doUpdate();
-       
-    }
 
     
 </script>
@@ -296,7 +342,7 @@
 <div id="Controls">
 
 <button type="button" class="b" id="Add Candidate Labels" onclick="ADDLabel()">Add Orbs</button>
-<button type="button" class="b" id="Remove Candidate Labels" onclick="REMOVEORB()">Remove Orbs</button>
+<button type="button" class="b" id="Remove Candidate Labels" onclick="REMOVELabel()">Remove Orbs</button>
 <button type="button" class="b" id="Add Target" onclick="AddTarget()">Add Target</button>
 <button type="button" class="b" id="Add Prediction" onclick="addPrediction()">Add Prediction</button>
 <button type="button" class="b" id="Remove Prediction" onclick="removePrediction()">Remove Prediction</button>
@@ -317,7 +363,10 @@
     <br>3. Drag labels around the screen to change their position. <br>
     </span>
 </div>
-<div class="container" id="graph">
+<div class="container" id="labelContainer"></div>
+<div class="container" id="predContainer"></div>
+<div class="container" id="targetContainer">    </div>
+<div class="container" id="graph"></div>
 <!-- create "axis" for the graph -->
 <!-- add horizontal line  -->
 <div id="yAxis"> </div>
