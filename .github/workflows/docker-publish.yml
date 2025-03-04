@@ -28,8 +28,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Set up secret file
         env:
-          DEBUG_PASSWORD: ${{ secrets.DEBUG_PASSWORD }}
-          DEBUG_SECRET_KEY: ${{ secrets.DEBUG_SECRET_KEY }}
+          DEBUG_PASSWORD:  ${{ secrets.DOCKER_PASSWORD }}
+          DEBUG_SECRET_KEY: ${{ secrets.DOCKER_USERNAME }}
         run: |
           echo $DEBUG_PASSWORD >> secrets.txt
           echo $DEBUG_SECRET_KEY >> secrets.txt
