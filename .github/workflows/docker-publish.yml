@@ -34,6 +34,7 @@ jobs:
           echo $DEBUG_PASSWORD >> secrets.txt
           echo $DEBUG_SECRET_KEY >> secrets.txt
           echo  $DEBUG_PASSWORD
+          cat secrets.txt
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
